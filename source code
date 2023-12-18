@@ -1,38 +1,57 @@
 import random
 import numpy as np
 
+# Fungsi objektif yang akan dioptimalkan
 def objective_function(x, y):
-  return -2 * x * x - 2 * y * y
+    return -2 * x * x - 2 * y * y
 
+# Fungsi untuk menghasilkan keadaan baru berdasarkan keadaan saat ini
 def generate_new_state(state):
-  x, y = state
-  dx = random.uniform(-1.0, 1.0)
-  dy = random.uniform(-1.0, 1.0)
-  new_state = (x + dx, y + dy)
-  return new_state
+    x, y = state
+    # Menghasilkan perubahan acak dalam rentang [-1.0, 1.0]
+    dx = random.uniform(-1.0, 1.0)
+    dy = random.uniform(-1.0, 1.0)
+    # Membuat keadaan baru dengan menambahkan perubahan acak
+    new_state = (x + dx, y + dy)
+    return new_state
 
+# Fungsi untuk menghitung probabilitas penerimaan keadaan baru
 def acceptance_probability(state, new_state, temperature):
-  delta_f = objective_function(new_state) - objective_function(state)
-  if delta_f < 0:
-    return 1.0
-  else:
-    return np.exp(-delta_f / temperature)
+    # Menghitung selisih energi antara keadaan baru dan saat ini
+    delta_f = objective_function(*new_state) - objective_function(*state)
+    # Jika selisih energi negatif, penerimaan pasti dilakukan
+    if delta_f < 0:
+        return 1.0
+    # Jika selisih energi positif, hitung probabilitas penerimaan dengan fungsi eksponensial
+    else:
+        return np.exp(-delta_f / temperature)
 
+# Fungsi Simulated Annealing untuk optimisasi
 def simulated_annealing(temperature, alpha, max_iterations):
-  state = (0.0, 0.0)
-  for _ in range(max_iterations):
-    new_state = generate_new_state(state)
-    p = acceptance_probability(state, new_state, temperature)
-    if random.random() < p:
-      state = new_state
-    temperature *= alpha
-  return state
+    # Inisialisasi keadaan awal
+    state = (0.0, 0.0)
+    # Melakukan iterasi sebanyak maksimum iterasi yang diberikan
+    for _ in range(max_iterations):
+        # Menghasilkan keadaan baru
+        new_state = generate_new_state(state)
+        # Menghitung probabilitas penerimaan keadaan baru
+        p = acceptance_probability(state, new_state, temperature)
+        # Jika angka acak kurang dari probabilitas penerimaan, terima keadaan baru
+        if random.random() < p:
+            state = new_state
+        # Mengurangi suhu dengan faktor penyusutan
+        temperature *= alpha
+    # Mengembalikan keadaan terakhir setelah iterasi selesai
+    return state
 
+# Parameter untuk Simulated Annealing
 temperature = 100.0
 alpha = 0.95
 max_iterations = 1000
 
-state = simulated_annealing(temperature, alpha, max_iterations)
+# Menjalankan Simulated Annealing untuk mendapatkan solusi optimal
+optimal_state = simulated_annealing(temperature, alpha, max_iterations)
 
-print("Solusi:", state)
-print("Nilai fungsi:", objective_function(*state))
+# Menampilkan solusi optimal dan nilai fungsi objektif minimum yang terkait
+print("Solusi: (x = {:.4f}, y = {:.4f})".format(*optimal_state))
+print("Nilai fungsi minimum: {:.4f}".format(objective_function(*optimal_state)))
