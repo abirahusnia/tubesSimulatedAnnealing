@@ -1,0 +1,38 @@
+import random
+import numpy as np
+
+def objective_function(x, y):
+  return -2 * x * x - 2 * y * y
+
+def generate_new_state(state):
+  x, y = state
+  dx = random.uniform(-1.0, 1.0)
+  dy = random.uniform(-1.0, 1.0)
+  new_state = (x + dx, y + dy)
+  return new_state
+
+def acceptance_probability(state, new_state, temperature):
+  delta_f = objective_function(new_state) - objective_function(state)
+  if delta_f < 0:
+    return 1.0
+  else:
+    return np.exp(-delta_f / temperature)
+
+def simulated_annealing(temperature, alpha, max_iterations):
+  state = (0.0, 0.0)
+  for _ in range(max_iterations):
+    new_state = generate_new_state(state)
+    p = acceptance_probability(state, new_state, temperature)
+    if random.random() < p:
+      state = new_state
+    temperature *= alpha
+  return state
+
+temperature = 100.0
+alpha = 0.95
+max_iterations = 1000
+
+state = simulated_annealing(temperature, alpha, max_iterations)
+
+print("Solusi:", state)
+print("Nilai fungsi:", objective_function(*state))
